@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+
+# Virtual envs / local env
+.venv/
+.env
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+
+# App caches / builds
+.cache/
+dist/
+build/
+
+# Node/web (if added later)
+node_modules/
+

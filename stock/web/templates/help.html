@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Strategy Guide — Stock Trend Advisor</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --accent:#22c55e; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    h1 { font-size: 22px; margin: 0 0 16px; }
+    .card { background: var(--card); border: 1px solid #1f2937; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    h2 { font-size: 16px; margin: 0 0 10px; color: var(--muted); }
+    p, li { line-height: 1.55; }
+    code { background:#0b1220; padding:2px 6px; border-radius:6px; }
+  </style>
+  </head>
+<body>
+  <div class="container">
+    <h1>Strategy Guide</h1>
+
+    <div class="card">
+      <h2>What the parameters mean</h2>
+      <ul>
+        <li><b>Fast SMA</b>: A short moving average (e.g., 20 or 50) tracking recent price. Smaller = more sensitive.</li>
+        <li><b>Slow SMA</b>: A long moving average (e.g., 50 or 200) tracking the long-term trend. Larger = smoother.</li>
+        <li><b>Top N</b>: How many highest-scoring symbols to show after ranking.</li>
+        <li><b>Cache TTL</b>: How long to reuse downloaded data before fetching again.</li>
+        <li><b>Throttle</b>: Delay between requests to avoid rate limits.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>How “BUY” is decided</h2>
+      <p>The app checks three trend conditions:</p>
+      <ul>
+        <li>Latest <b>bullish crossover</b>: Fast SMA crosses above Slow SMA.</li>
+        <li>Price is <b>above Slow SMA</b> (e.g., 200-day) — trend confirmation.</li>
+        <li><b>Fast SMA slope</b> is positive — short-term uptrend.</li>
+      </ul>
+      <p><b>BUY</b> if at least <b>2 out of 3</b> pass; otherwise <b>DON'T BUY</b>.</p>
+    </div>
+
+    <div class="card">
+      <h2>Suggested starting points</h2>
+      <ul>
+        <li><b>Conservative trend</b>: Fast=50, Slow=200. Fewer signals, more stable.</li>
+        <li><b>Responsive trend</b>: Fast=20, Slow=50. More signals, more noise.</li>
+        <li><b>Daily data</b>: Cache TTL=24h, Throttle≈400ms; increase if you hit rate limits.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Tips</h2>
+      <ul>
+        <li>Use <b>Yahoo</b> source for quick exploration (no API key).</li>
+        <li>Increase <b>Top N</b> once performance feels good; the cache speeds up repeats.</li>
+        <li>Combine the <b>BUY</b> decision with your own risk rules (position sizing, stops).</li>
+      </ul>
+    </div>
+
+    <p><a href="/">Back to app</a></p>
+  </div>
+</body>
+</html>
+
