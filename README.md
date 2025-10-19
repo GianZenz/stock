@@ -1,120 +1,90 @@
-﻿Stock Trend Advisor (Starter)
+Stock Trend Advisor
 
 Overview
 
-- CLI app that analyzes historical OHLCV data from CSV files to compute common indicators and suggest buy candidates using a simple SMA crossover strategy.
-- Pure-Python implementation (no external packages) to work in restricted environments. You can later switch to pandas or add live data providers.
+- Analyze stock trends and rank buy candidates using a simple, transparent SMA crossover strategy (Fast vs. Slow moving averages).
+- Three ways to use it:
+  - Web UI (FastAPI + Jinja) — modern, easiest to use
+  - Desktop GUI (Tkinter) — lightweight, no extra deps
+  - CLI — scriptable and fast
 
-Quick Start
+Quick Start (Web UI)
 
-1) Put daily candles in `data/` as CSVs named like `AAPL.csv`, one per symbol.
-   Required headers (case-insensitive): Date, Open, High, Low, Close, Volume
-   Date format: YYYY-MM-DD
+1) Run the web app (auto-installs FastAPI deps if needed):
+   - `python -m stock.web`
+2) Open http://127.0.0.1:8000/
+3) Choose options and click Analyze:
+   - Source: Yahoo (no key), Alpha Vantage (API key), or CSV
+   - Preset (Yahoo): S&P 100 or NASDAQ 100
+   - Auto Count: 20/50/80/All
+   - Strategy Preset: Conservative (50/200) or Responsive (20/50) or Custom
+   - Optional: toggle “Manual symbols” to enter tickers
+   - Use “Buy only” or “Compact view”; click “Guide” for a short strategy explainer
 
-2) Run the CLI to analyze all CSVs in `data/` and list top ideas:
+Other Ways To Run
 
-   `python main.py --data-dir data --top 10`
+- Desktop GUI (Tkinter)
+  - `python -m stock.gui`
+  - Source-driven controls: Preset + Auto (Yahoo) / Auto (API) / Discover (CSV)
 
-3) Or specify a subset of symbols:
+- CLI examples
+  - Auto Yahoo universe (no typing):
+    - `python main.py --source yahoo --auto 20 --decision-only`
+  - Specific tickers (Yahoo):
+    - `python main.py --source yahoo --symbols AAPL,MSFT --fast 50 --slow 200`
+  - Alpha Vantage (with your key):
+    - `python main.py --source alphavantage --apikey YOUR_KEY --auto 10 --top 10`
+    - `python main.py --source alphavantage --apikey YOUR_KEY --symbols AAPL,MSFT`
+  - CSV folder:
+    - `python main.py --data-dir data --symbols AAPL,MSFT --top 10`
 
-   `python main.py --data-dir data --symbols AAPL,MSFT,NVDA --top 5`
+Data Sources
 
-GUI
+- Yahoo Finance (no key)
+  - Uses the chart JSON endpoint; practical rate limits apply.
+  - Best for quick exploration. Throttle + caching help a lot.
+- Alpha Vantage (free API key)
+  - Official API; free tier is 5 requests/minute. Demo key returns MSFT only.
+- CSV
+  - Drop daily OHLCV files in `data/` as `<SYMBOL>.csv` with headers (case‑insensitive):
+    - `Date,Open,High,Low,Close,Volume` (Date format: YYYY‑MM‑DD)
 
-- Launch the GUI (Tkinter-based, no extra dependencies):
+Strategy: How BUY Is Decided
 
-  `python -m stock.gui`
+- The app checks three simple trend signals:
+  - Latest bullish crossover (Fast SMA crossed above Slow SMA)
+  - Price above Slow SMA (e.g., 200‑day) — trend confirmation
+  - Fast SMA slope positive — short‑term uptrend
+- Decision = BUY if at least 2 of 3 checks pass; otherwise DON’T BUY
+- Score combines crossover recency + price distance vs 200SMA + 50SMA slope (higher is better)
 
-- In the GUI you can:
-  - Browse to select the `data/` directory
-  - Discover symbols (auto-detect CSVs)
-  - Enter custom symbols (comma-separated)
-  - Set SMA windows and Top N
-  - Click Analyze to see ranked results
-  - Auto (API): with Source=alphavantage and your API key, click Auto (API) to fetch a small list of active symbols from Alpha Vantage, fill the Symbols field, and then Analyze.
-  - Web UI (FastAPI): see FastAPI section below to run a local modern UI.
+Good Starting Values
 
-API Data (Alpha Vantage)
+- Conservative trend: Fast=50, Slow=200 (fewer, steadier signals)
+- Responsive trend: Fast=20, Slow=50 (more signals, more noise)
+- Daily data ops: Cache TTL=24h, Throttle=400ms (increase if you hit limits)
 
-- You can fetch data automatically using Alpha Vantage without adding dependencies.
-- CLI example (uses env var if `--apikey` is omitted):
+Troubleshooting
 
-  `set ALPHAVANTAGE_API_KEY=YOUR_KEY && python main.py --source alphavantage --symbols AAPL,MSFT --fast 50 --slow 200`
-
-  or
-
-  `python main.py --source alphavantage --apikey YOUR_KEY --symbols AAPL --fast 50 --slow 200`
-
-- GUI: choose `Source = alphavantage` and paste your API key, then Analyze.
-- Notes: Free tier is rate-limited; large symbol lists may throttle.
-
-Troubleshooting (Alpha Vantage)
-
-- If GUI status shows "Done. Shown 0 of 0 symbols":
-  - Enter symbols explicitly (e.g., `AAPL,MSFT`). Discovery only works with CSV.
-  - Test connectivity with the public demo key: `Source = alphavantage`, `API Key = demo`, `Symbols = MSFT`.
-  - Try a single symbol to avoid rate limits.
-  - Wait ~60 seconds and retry (free tier: 5 req/min).
-  - Verify your key (no extra spaces) and internet connectivity.
-
-Auto-discovery from API
-
-- CLI: auto-scan N symbols from Alpha Vantage listing (active only):
-
-  `python main.py --source alphavantage --apikey YOUR_KEY --auto 10 --top 10`
-
-  This fetches up to 10 active symbols (NYSE/NASDAQ), then analyzes them. Due to rate limits, not all may return data immediately; try smaller N or rerun.
-
-- GUI: click "Auto (API)" (Source=alphavantage, provide key) to populate symbols automatically.
-
-FastAPI Web UI (modern)
-
-- Install deps (once):
-
-  pip install fastapi uvicorn jinja2
-
-- Run the web app:
-
-  python -m stock.web
-
-- Open your browser at:
-
-  http://127.0.0.1:8000/
-
-- Features:
-  - Source selection: Yahoo (no key), Alpha Vantage (API key), or CSV
-  - Preset selector (S&P 100, NASDAQ 100) for Yahoo
-  - Auto Count (20/50/80/All)
-  - Strategy params: Fast/Slow SMA, Top N
-  - Cache TTL and Throttle per request to manage rate limits
-  - Results table with BUY/score and key metrics
-
-Buy/Don't Buy Decision
-
-- The app now produces an explicit decision based on simple checks:
-  - Recent bullish SMA crossover
-  - Price above 200SMA
-  - 50SMA slope trending up
-- Decision is `BUY` if at least 2 of 3 checks pass; otherwise `DON'T BUY`.
-- CLI: add `--decision-only` to list only BUYs.
-
-Scoring (initial heuristic)
-
-- Favors recent bullish 50/200 SMA crossovers.
-- Rewards positive distance of price vs. 200SMA and uptrend in 50SMA.
-- Outputs a combined score to rank symbols; tune weights in code.
+- “0 of 0” results:
+  - Yahoo: likely rate‑limited or blocked. Try a single symbol (e.g., MSFT), wait 30–60s, or raise throttle.
+  - Alpha Vantage: rate‑limited or invalid key. Try MSFT only; wait 60s; verify key.
+  - CSV: verify headers/date format; see schema above.
+- Cache lives under `.cache/`. Data refreshes after TTL hours.
 
 Project Layout
 
-- `stock/cli.py` � CLI entrypoint / argument parsing
-- `stock/data/csv_provider.py` — CSV loader for OHLCV
-- `stock/indicators.py` — SMA, EMA, RSI, MACD helpers
-- `stock/strategy/sma_crossover.py` — Signals + scoring features
-- `stock/recommend.py` — Aggregates features to a score and ranks
-- `main.py` — Thin wrapper calling the CLI
-- `data/` — Your CSV files live here
+- `main.py` — CLI entrypoint
+- `stock/cli.py` — CLI logic and flags
+- `stock/gui.py` — Tkinter GUI
+- `stock/web/` — FastAPI app (run with `python -m stock.web`)
+- `stock/data/` — Data loaders (csv, yahoo, alpha_vantage) + caching
+- `stock/recommend.py` — Scoring and BUY/DON’T BUY decision
+- `stock/strategy/sma_crossover.py` — Strategy features and events
+- `stock/indicators.py` — SMA/EMA/RSI/MACD helpers
+- `stock/universe.py` — Preset universes (S&P 100, NASDAQ 100)
 
-CSV Format Example
+CSV Example
 
 Date,Open,High,Low,Close,Volume
 2024-01-02,100.0,101.5,99.2,101.0,12345678
@@ -122,10 +92,4 @@ Date,Open,High,Low,Close,Volume
 
 Notes
 
-- No brokerage or API integration is included yet. This starter focuses on offline CSV analysis so you can iterate anywhere.
-- Backtesting is not wired yet; the strategy file returns events you can use to add it.
-- This is NOT financial advice. Use at your own risk.
-
-
-
-
+- For research/education; not financial advice. Use at your own risk.
