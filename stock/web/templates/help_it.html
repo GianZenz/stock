@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guida alla Strategia — Stock Trend Advisor</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --accent:#22c55e; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    h1 { font-size: 22px; margin: 0 0 16px; }
+    .card { background: var(--card); border: 1px solid #1f2937; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    h2 { font-size: 16px; margin: 0 0 10px; color: var(--muted); }
+    p, li { line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <h1 style="margin:0;">Guida alla Strategia</h1>
+      <div class="muted" style="display:flex; gap:8px; align-items:center;">
+        <span>Lingua:</span>
+        <a class="btn" href="/help">EN</a>
+        <a class="btn" href="/help-it">IT</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Cosa significano i parametri</h2>
+      <p><b>Fast SMA (Media Mobile Veloce)</b>: Una media basata sui prezzi recenti (es. 20 o 50 giorni). Valori più bassi = più sensibilità ai movimenti di prezzo.</p>
+      <p><b>Slow SMA (Media Mobile Lenta)</b>: Una media più lunga (es. 50 o 200 giorni) che mostra l’andamento generale. Valori più alti = maggiore stabilità.</p>
+      <p><b>Top N</b>: Numero dei titoli migliori da mostrare dopo la valutazione.</p>
+      <p><b>Cache TTL</b>: Tempo per cui i dati scaricati vengono riutilizzati prima di essere aggiornati.</p>
+      <p><b>Throttle</b>: Pausa tra una richiesta e l’altra per evitare blocchi o limiti dal fornitore dei dati.</p>
+    </div>
+
+    <div class="card">
+      <h2>Come viene deciso “BUY” (COMPRA)</h2>
+      <p>L’app controlla tre condizioni di trend:</p>
+      <ul>
+        <li>Ultimo incrocio rialzista: la Media Veloce supera verso l’alto la Media Lenta.</li>
+        <li>Il prezzo è sopra la Media Lenta (es. quella a 200 giorni) → conferma del trend positivo.</li>
+        <li>La pendenza della Media Veloce è in salita → breve termine in miglioramento.</li>
+      </ul>
+      <p><b>👉 BUY</b> se almeno <b>2 condizioni su 3</b> sono vere; altrimenti <b>DON’T BUY</b> (NON COMPRARE).</p>
+    </div>
+
+    <div class="card">
+      <h2>Impostazioni consigliate</h2>
+      <ul>
+        <li><b>Trend conservativo</b>: Fast=50, Slow=200 → meno segnali ma più affidabili.</li>
+        <li><b>Trend reattivo</b>: Fast=20, Slow=50 → più segnali ma più rischio di falsi allarmi.</li>
+        <li><b>Dati giornalieri</b>: Cache TTL=24h, Throttle ≈400 ms → aumentare se compaiono errori per troppi accessi.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Suggerimenti</h2>
+      <ul>
+        <li>Usa la fonte <b>Yahoo</b> per fare prove iniziali (non richiede chiavi API).</li>
+        <li>Aumenta <b>Top N</b> quando l’app diventa veloce (la cache accelera i riavvii).</li>
+        <li>Il segnale <b>BUY</b> non è un consiglio finanziario: abbinalo sempre alle tue regole di gestione del rischio (quanto investire, stop loss ecc.).</li>
+      </ul>
+    </div>
+
+    <p><a href="/">Torna all’app</a></p>
+  </div>
+</body>
+</html>

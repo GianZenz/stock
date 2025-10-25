@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Stock Trend Advisor</title>
+  <title>Stock Trend Advisor — Web (IT)</title>
   <style>
     :root { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --accent:#22c55e; --warn:#f59e0b; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
     .container { max-width: 1280px; margin: 0 auto; padding: 24px 16px; }
     h1 { font-size: 22px; margin: 0 0 16px; }
-    /* Responsive card grid: auto-fit to avoid cramped columns */
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
     .card { background: var(--card); border: 1px solid #1f2937; border-radius: 12px; padding: 16px; overflow: hidden; }
     .card h2 { font-size: 16px; margin: 0 0 10px; color: var(--muted); }
     label { display:block; font-size: 12px; color: var(--muted); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     input[type="text"], input[type="number"], select { width: 100%; max-width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #374151; background:#0b1220; color: var(--text); }
-    /* Responsive field rows inside cards */
     .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
     .row3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
     .actions { display:flex; gap:12px; align-items:center; flex-wrap: wrap; }
-    .inline { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .short { width:auto; min-width: 200px; max-width: 260px; }
-    .hstack { display:flex; gap:10px; align-items:center; flex-wrap:nowrap; }
     .btn { background:#1f2937; color:var(--text); border:1px solid #374151; padding:10px 14px; border-radius:8px; cursor:pointer; }
     .btn.primary { background: var(--accent); color:#052e16; border-color:#16a34a; font-weight:600; }
-    .btn.warn { background: #1f2937; border-color: #f59e0b; color:#f59e0b; }
     .muted { color: var(--muted); font-size: 12px; }
+    .inline { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .hstack { display:flex; gap:10px; align-items:center; flex-wrap:nowrap; }
+    .short { width:auto; min-width: 200px; max-width: 260px; }
     table { width:100%; border-collapse: collapse; }
     th, td { text-align:left; padding:10px; border-bottom:1px solid #1f2937; font-size: 14px; }
     th { color: var(--muted); font-weight:600; cursor: pointer; user-select: none; }
@@ -41,20 +38,20 @@
 <body>
   <div class="container">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-      <h1 style="margin:0;">Stock Trend Advisor — Web</h1>
+      <h1 style="margin:0;">Stock Trend Advisor — Web (IT)</h1>
       <div class="muted" style="display:flex; gap:8px; align-items:center;">
-        <span>Language:</span>
+        <span>Lingua:</span>
         <a class="btn" href="/">EN</a>
         <a class="btn" href="/it">IT</a>
       </div>
     </div>
-    <form method="post" action="/analyze">
+    <form method="post" action="/analyze-it">
       <div class="grid">
         <div class="card">
-          <h2>1. Source & Symbols</h2>
+          <h2>1. Fonte &amp; Simboli</h2>
           <div class="row3">
             <div>
-              <label>Source</label>
+              <label>Fonte</label>
               <select name="source" id="source" onchange="toggleBySource()">
                 <option value="yahoo" {{ 'selected' if defaults.source=='yahoo' else '' }}>Yahoo</option>
                 <option value="alphavantage" {{ 'selected' if defaults.source=='alphavantage' else '' }}>Alpha Vantage</option>
@@ -70,7 +67,7 @@
               </select>
             </div>
             <div id="countGroup">
-              <label>Auto Count</label>
+              <label>Quantità Auto</label>
               <select name="count" id="count">
                 {% for c in ['20','50','80','All'] %}
                   <option value="{{c}}" {{ 'selected' if defaults.count==c else '' }}>{{c}}</option>
@@ -84,34 +81,33 @@
               <input type="text" name="apikey" id="apikey" value="{{defaults.apikey}}" />
             </div>
             <div id="dataDirGroup">
-              <label>CSV Data Dir</label>
+              <label>Cartella CSV</label>
               <input type="text" name="data_dir" id="data_dir" value="{{defaults.data_dir}}" />
             </div>
           </div>
           <div class="row" style="margin-top:8px; align-items:center;">
             <label class="muted" style="display:flex; align-items:center; gap:6px;">
-              <input type="checkbox" id="manualToggle" onchange="toggleManual()" /> Manual symbols
+              <input type="checkbox" id="manualToggle" onchange="toggleManual()" /> Simboli manuali
             </label>
           </div>
           <div id="symbolsGroup" style="margin-top:8px; display:none;">
-            <label>Symbols (comma-separated)</label>
+            <label>Simboli (separati da virgola)</label>
             <input type="text" name="symbols" id="symbols" value="{{defaults.symbols}}" placeholder="AAPL,MSFT,GOOGL" />
           </div>
         </div>
 
         <div class="card">
-          <h2>2. Strategy Parameters</h2>
+          <h2>2. Parametri Strategia</h2>
           <div class="inline" style="margin-bottom:8px;">
             <div style="flex:1 1 auto; min-width:260px;">
-              <label>Strategy Preset</label>
+              <label>Preset strategia</label>
               <div class="hstack">
-              <select id="strategyPreset" name="strategy_preset" class="short" onchange="applyPreset()">
-                <option value="custom" {{ 'selected' if defaults.strategy_preset=='custom' else '' }}>Custom</option>
-                <option value="conservative" {{ 'selected' if defaults.strategy_preset=='conservative' else '' }}>Conservative (50 / 200)</option>
-                <option value="responsive" {{ 'selected' if defaults.strategy_preset=='responsive' else '' }}>Responsive (20 / 50)</option>
-              </select>
-                <a class="btn" href="/help" target="_blank" rel="noopener">Guide</a>
-                <a class="btn" href="/help-it" target="_blank" rel="noopener">Guida (IT)</a>
+                <select id="strategyPreset" name="strategy_preset" class="short" onchange="applyPreset()">
+                  <option value="custom" {{ 'selected' if defaults.strategy_preset=='custom' else '' }}>Personalizzato</option>
+                  <option value="conservative" {{ 'selected' if defaults.strategy_preset=='conservative' else '' }}>Conservativo (50 / 200)</option>
+                  <option value="responsive" {{ 'selected' if defaults.strategy_preset=='responsive' else '' }}>Reattivo (20 / 50)</option>
+                </select>
+                <a class="btn" href="/help-it" target="_blank" rel="noopener">Guida</a>
               </div>
             </div>
           </div>
@@ -131,25 +127,25 @@
           </div>
           <div class="row" style="margin-top:8px;">
             <div>
-              <label>Cache TTL (hours)</label>
+              <label>Cache TTL (ore)</label>
               <input type="number" name="ttl_hours" value="{{defaults.ttl_hours}}" min="1" max="168" />
             </div>
             <div>
-              <label>Throttle (ms/request)</label>
+              <label>Ritardo (ms/richiesta)</label>
               <input type="number" name="throttle_ms" value="{{defaults.throttle_ms}}" min="0" max="5000" />
             </div>
           </div>
         </div>
 
         <div class="card">
-          <h2>3. Analyze</h2>
+          <h2>3. Analizza</h2>
           <div class="actions">
-            <button class="btn primary" type="submit">Analyze</button>
+            <button class="btn primary" type="submit">Analizza</button>
             <label style="display:flex; align-items:center; gap:6px;">
-              <input type="checkbox" name="decision_only" {{ 'checked' if defaults.decision_only else '' }} /> Buy only
+              <input type="checkbox" name="decision_only" {{ 'checked' if defaults.decision_only else '' }} /> Solo BUY
             </label>
-            <button class="btn" type="button" onclick="clearResults()">Clear Results</button>
-            <span class="muted">Results will appear below</span>
+            <button class="btn" type="button" onclick="clearResults()">Cancella Risultati</button>
+            <span class="muted">I risultati appariranno qui sotto</span>
           </div>
           {% if hint %}
             <p class="hint" style="margin-top:10px;">{{ hint }}</p>
@@ -161,36 +157,37 @@
     {% if ranked %}
     <div class="card" id="resultsCard" style="margin-top:14px;">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-        <h2 style="margin:0;">Results</h2>
+        <h2 style="margin:0;">Risultati</h2>
         <label class="muted" style="display:flex; align-items:center; gap:6px;">
-          <input type="checkbox" id="compactToggle" onchange="toggleCompact()" /> Compact view
+          <input type="checkbox" id="compactToggle" onchange="toggleCompact()" /> Vista compatta
         </label>
       </div>
       <div class="table-wrap" id="resultsWrapper" style="overflow:auto; margin-top:8px;">
         <table>
           <thead>
             <tr>
-              <th data-col="0" data-type="str">Symbol <span class="arrow"></span></th>
-              <th data-col="1" data-type="num">Score <span class="arrow"></span></th>
-              <th data-col="2" data-type="str">Decision <span class="arrow"></span></th>
-              <th data-col="3" data-type="num">Last Close <span class="arrow"></span></th>
-              <th data-col="4" data-type="num">Dist 200SMA % <span class="arrow"></span></th>
-              <th data-col="5" data-type="num">50SMA Slope <span class="arrow"></span></th>
-              <th data-col="6" data-type="str">Last Signal <span class="arrow"></span></th>
+              <th data-col="0" data-type="str">Simbolo <span class="arrow"></span></th>
+              <th data-col="1" data-type="num">Punteggio <span class="arrow"></span></th>
+              <th data-col="2" data-type="str">Decisione <span class="arrow"></span></th>
+              <th data-col="3" data-type="num">Ultima Chiusa <span class="arrow"></span></th>
+              <th data-col="4" data-type="num">Distanza 200SMA % <span class="arrow"></span></th>
+              <th data-col="5" data-type="num">Pendenza 50SMA <span class="arrow"></span></th>
+              <th data-col="6" data-type="str">Ultimo Segnale <span class="arrow"></span></th>
             </tr>
           </thead>
           <tbody>
             {% for r in ranked %}
               {% set m = r.meta %}
+              {% set raw_d = m.get('decision') or "DON'T BUY" %}
+              {% set d_it = 'COMPRA' if raw_d == 'BUY' else 'NON COMPRARE' %}
               <tr>
                 <td>{{ r.symbol }}</td>
                 <td>{{ '%.3f'|format(r.score) }}</td>
-                {% set d = m.get('decision') or "DON'T BUY" %}
-                <td class="{{ 'buy' if d=='BUY' else 'nobuy' }}">{{ d }}</td>
+                <td class="{{ 'buy' if raw_d=='BUY' else 'nobuy' }}">{{ d_it }}</td>
                 <td>{{ '%.2f'|format(m.get('last_close') or 0) if m.get('last_close') is number else 'nan' }}</td>
                 <td>{{ '%.2f'|format(m.get('dist_200sma_pct') or 0) if m.get('dist_200sma_pct') is number else 'nan' }}</td>
                 <td>{{ '%.4f'|format(m.get('sma50_slope') or 0) if m.get('sma50_slope') is number else 'nan' }}</td>
-                <td>{{ m.get('last_signal') or 'none' }}</td>
+                <td>{{ m.get('last_signal') or 'nessuno' }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -199,45 +196,10 @@
     </div>
     {% endif %}
 
-    <p class="muted" style="margin-top:12px;">Tip: Yahoo requires internet access and may impose practical rate limits. Use cache/throttle settings to reduce calls.</p>
+    <p class="muted" style="margin-top:12px;">Suggerimento: Yahoo richiede accesso a Internet e può imporre limiti pratici. Usa le impostazioni di cache/ritardo per ridurre le chiamate.</p>
   </div>
 
   <script>
-    function toggleBySource(){
-      const src = document.getElementById('source').value;
-
-      const apikey = document.getElementById('apikey');
-      const apikeyGroup = document.getElementById('apikeyGroup');
-      const preset = document.getElementById('preset');
-      const presetGroup = document.getElementById('presetGroup');
-      const count = document.getElementById('count');
-      const countGroup = document.getElementById('countGroup');
-      const dataDir = document.getElementById('data_dir');
-      const dataDirGroup = document.getElementById('dataDirGroup');
-
-      const show = (el, cond) => { if(el) el.style.display = cond ? '' : 'none'; };
-
-      // Enable/disable and show/hide by source
-      const isYahoo = src === 'yahoo';
-      const isAV = src === 'alphavantage';
-      const isCSV = src === 'csv';
-
-      if (apikey) apikey.disabled = !isAV;
-      if (preset) preset.disabled = !isYahoo;
-      if (count) count.disabled = !(isYahoo || isAV);
-      if (dataDir) dataDir.disabled = !isCSV;
-
-      show(apikeyGroup, isAV);
-      show(presetGroup, isYahoo);
-      show(countGroup, (isYahoo || isAV));
-      show(dataDirGroup, isCSV);
-      // Keep manual symbols as a separate toggle; source does not affect it
-    }
-    function toggleManual(){
-      const cb = document.getElementById('manualToggle');
-      const group = document.getElementById('symbolsGroup');
-      if (group) group.style.display = (cb && cb.checked) ? '' : 'none';
-    }
     function sortTable(th){
       const table = th.closest('table');
       const col = parseInt(th.dataset.col);
@@ -245,52 +207,31 @@
       const arrow = th.querySelector('.arrow');
       const current = th.dataset.order || 'desc';
       const next = current === 'asc' ? 'desc' : 'asc';
-      // Reset arrows
       table.querySelectorAll('th .arrow').forEach(a => a.textContent='');
       arrow.textContent = next === 'asc' ? '▲' : '▼';
       th.dataset.order = next;
       const rows = Array.from(table.tBodies[0].rows);
-      const parse = v => {
-        if (type === 'num') { const n = parseFloat(v); return isNaN(n) ? -Infinity : n; }
-        return v.toString().toLowerCase();
-      };
-      rows.sort((r1, r2)=>{
-        const v1 = parse(r1.cells[col].innerText.trim());
-        const v2 = parse(r2.cells[col].innerText.trim());
-        if (v1 < v2) return next === 'asc' ? -1 : 1;
-        if (v1 > v2) return next === 'asc' ? 1 : -1;
-        return 0;
-      });
+      const parse = v => { if (type === 'num') { const n = parseFloat(v); return isNaN(n) ? -Infinity : n; } return v.toString().toLowerCase(); };
+      rows.sort((r1, r2)=>{ const v1 = parse(r1.cells[col].innerText.trim()); const v2 = parse(r2.cells[col].innerText.trim()); if (v1 < v2) return next === 'asc' ? -1 : 1; if (v1 > v2) return next === 'asc' ? 1 : -1; return 0; });
       rows.forEach(r=>table.tBodies[0].appendChild(r));
     }
-    function attachSorting(){
-      document.querySelectorAll('thead th[data-col]').forEach(th=>{
-        th.addEventListener('click', ()=>sortTable(th));
-      });
+    function attachSorting(){ document.querySelectorAll('thead th[data-col]').forEach(th=>{ th.addEventListener('click', ()=>sortTable(th)); }); }
+    function toggleCompact(){ const wrap = document.getElementById('resultsWrapper'); if(!wrap) return; const cb = document.getElementById('compactToggle'); if(cb && cb.checked) wrap.classList.add('compact'); else wrap.classList.remove('compact'); }
+    function toggleBySource(){
+      const src = document.getElementById('source').value;
+      const apikey = document.getElementById('apikey'); const apikeyGroup = document.getElementById('apikeyGroup');
+      const preset = document.getElementById('preset'); const presetGroup = document.getElementById('presetGroup');
+      const count = document.getElementById('count'); const countGroup = document.getElementById('countGroup');
+      const dataDir = document.getElementById('data_dir'); const dataDirGroup = document.getElementById('dataDirGroup');
+      const show = (el, cond) => { if(el) el.style.display = cond ? '' : 'none'; };
+      const isYahoo = src === 'yahoo'; const isAV = src === 'alphavantage'; const isCSV = src === 'csv';
+      if (apikey) apikey.disabled = !isAV; if (preset) preset.disabled = !isYahoo; if (count) count.disabled = !(isYahoo || isAV); if (dataDir) dataDir.disabled = !isCSV;
+      show(apikeyGroup, isAV); show(presetGroup, isYahoo); show(countGroup, (isYahoo || isAV)); show(dataDirGroup, isCSV);
     }
-    function applyPreset(){
-      const sel = document.getElementById('strategyPreset');
-      if(!sel) return;
-      const val = sel.value;
-      const fast = document.querySelector('input[name="fast"]');
-      const slow = document.querySelector('input[name="slow"]');
-      if(!fast || !slow) return;
-      if(val === 'conservative'){ fast.value = 50; slow.value = 200; }
-      else if(val === 'responsive'){ fast.value = 20; slow.value = 50; }
-    }
-    function toggleCompact(){
-      const wrap = document.getElementById('resultsWrapper');
-      if(!wrap) return;
-      const cb = document.getElementById('compactToggle');
-      if(cb && cb.checked) wrap.classList.add('compact'); else wrap.classList.remove('compact');
-    }
-    function clearResults(){
-      const card = document.getElementById('resultsCard');
-      if(card){ card.remove(); }
-    }
-    toggleBySource();
-    attachSorting();
-    toggleManual();
+    function toggleManual(){ const cb = document.getElementById('manualToggle'); const group = document.getElementById('symbolsGroup'); if (group) group.style.display = (cb && cb.checked) ? '' : 'none'; }
+    function applyPreset(){ const sel = document.getElementById('strategyPreset'); if(!sel) return; const val = sel.value; const fast = document.querySelector('input[name="fast"]'); const slow = document.querySelector('input[name="slow"]'); if(!fast || !slow) return; if(val==='conservative'){ fast.value=50; slow.value=200; } else if(val==='responsive'){ fast.value=20; slow.value=50; } }
+    function clearResults(){ const card = document.getElementById('resultsCard'); if(card){ card.remove(); } }
+    toggleBySource(); attachSorting(); toggleManual();
   </script>
 </body>
 </html>

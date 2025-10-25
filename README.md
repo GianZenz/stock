@@ -72,6 +72,15 @@ Troubleshooting
   - CSV: verify headers/date format; see schema above.
 - Cache lives under `.cache/`. Data refreshes after TTL hours.
 
+Windows EXE (shareable)
+
+- Build a single-file executable (includes Python runtime):
+  - PowerShell: `scripts/build_exe.ps1`
+  - or CMD: `scripts\build_web_exe.bat`
+  - Output: `dist/StockAdvisor-Web.exe`
+- Run the EXE; it starts the web app at http://127.0.0.1:8000/
+- For Italian users, a simple launcher is provided: `scripts/start_web_it.bat`
+
 Project Layout
 
 - `main.py` — CLI entrypoint
