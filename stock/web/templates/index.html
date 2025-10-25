@@ -171,12 +171,13 @@
           <thead>
             <tr>
               <th data-col="0" data-type="str">Symbol <span class="arrow"></span></th>
-              <th data-col="1" data-type="num">Score <span class="arrow"></span></th>
-              <th data-col="2" data-type="str">Decision <span class="arrow"></span></th>
-              <th data-col="3" data-type="num">Last Close <span class="arrow"></span></th>
-              <th data-col="4" data-type="num">Dist 200SMA % <span class="arrow"></span></th>
-              <th data-col="5" data-type="num">50SMA Slope <span class="arrow"></span></th>
-              <th data-col="6" data-type="str">Last Signal <span class="arrow"></span></th>
+              <th data-col="1" data-type="str">Chart <span class="arrow"></span></th>
+              <th data-col="2" data-type="num">Score <span class="arrow"></span></th>
+              <th data-col="3" data-type="str">Decision <span class="arrow"></span></th>
+              <th data-col="4" data-type="num">Last Close <span class="arrow"></span></th>
+              <th data-col="5" data-type="num">Dist 200SMA % <span class="arrow"></span></th>
+              <th data-col="6" data-type="num">50SMA Slope <span class="arrow"></span></th>
+              <th data-col="7" data-type="str">Last Signal <span class="arrow"></span></th>
             </tr>
           </thead>
           <tbody>
@@ -184,6 +185,13 @@
               {% set m = r.meta %}
               <tr>
                 <td>{{ r.symbol }}</td>
+                <td>
+                  {% if m.get('chart_svg') %}
+                    <div style="width:230px; max-width:230px;">{{ m.get('chart_svg') | safe }}</div>
+                  {% else %}
+                    <span class="muted">n/a</span>
+                  {% endif %}
+                </td>
                 <td>{{ '%.3f'|format(r.score) }}</td>
                 {% set d = m.get('decision') or "DON'T BUY" %}
                 <td class="{{ 'buy' if d=='BUY' else 'nobuy' }}">{{ d }}</td>

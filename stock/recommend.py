@@ -4,6 +4,56 @@ from .data.csv_provider import load_symbol_csv
 from .strategy.sma_crossover import evaluate_symbol
 
 
+def _sparkline_svg(closes: List[float], sma_fast: List[Optional[float]], sma_slow: List[Optional[float]], last_n: int = 90, width: int = 220, height: int = 60) -> str:
+    n = min(last_n, len(closes))
+    if n <= 1:
+        return ""
+    xs = closes[-n:]
+    sf = sma_fast[-n:] if sma_fast else [None] * n
+    ss = sma_slow[-n:] if sma_slow else [None] * n
+    series: List[float] = [float(v) for v in xs]
+    for arr in (sf, ss):
+        for v in arr:
+            if v is not None:
+                series.append(float(v))
+    lo = min(series)
+    hi = max(series)
+    if hi == lo:
+        hi = lo + 1.0
+    pad_x, pad_y = 4, 4
+    span_x = width - pad_x * 2
+    span_y = height - pad_y * 2
+
+    def pt(i: int, v: float):
+        x = pad_x + (span_x * i) / (n - 1)
+        y = pad_y + span_y * (1.0 - (v - lo) / (hi - lo))
+        return x, y
+
+    def path_for(vals: List[Optional[float]], color: str, stroke: float = 1.0, opacity: float = 1.0) -> str:
+        d: List[str] = []
+        prev = False
+        for i in range(n):
+            v = vals[i]
+            if v is None:
+                prev = False
+                continue
+            x, y = pt(i, float(v))
+            if not prev:
+                d.append(f"M{x:.2f},{y:.2f}")
+                prev = True
+            else:
+                d.append(f"L{x:.2f},{y:.2f}")
+        if not d:
+            return ""
+        return f"<path d='{' '.join(d)}' fill='none' stroke='{color}' stroke-width='{stroke}' stroke-opacity='{opacity}' />"
+
+    price_path = path_for([float(v) for v in xs], "#60a5fa", 1.2)
+    fast_path = path_for(sf, "#22c55e", 1.0, 0.9)
+    slow_path = path_for(ss, "#f59e0b", 1.0, 0.9)
+    grid = f"<rect x='0' y='0' width='{width}' height='{height}' rx='6' ry='6' fill='transparent' stroke='#1f2937'/>"
+    return f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>" + grid + price_path + fast_path + slow_path + "</svg>"
+
+
 def _score(features: Dict) -> float:
     score = 0.0
 
@@ -69,7 +119,7 @@ def _decision(features: Dict) -> Tuple[str, List[str]]:
     return decision, reasons
 
 
-def analyze_and_rank_with_loader(symbols: List[str], loader: Callable[[str], Optional[Dict]], fast: int = 50, slow: int = 200) -> List[Dict]:
+def analyze_and_rank_with_loader(symbols: List[str], loader: Callable[[str], Optional[Dict]], fast: int = 50, slow: int = 200, include_chart: bool = False) -> List[Dict]:
     results: List[Dict] = []
     for sym in symbols:
         ts = loader(sym)
@@ -78,6 +128,12 @@ def analyze_and_rank_with_loader(symbols: List[str], loader: Callable[[str], Opt
         feats = evaluate_symbol(ts, fast=fast, slow=slow)
         score = _score(feats)
         decision, reasons = _decision(feats)
+        chart_svg = None
+        if include_chart:
+            try:
+                chart_svg = _sparkline_svg(ts.get("close", []), feats.get("sma_fast", []), feats.get("sma_slow", []))
+            except Exception:
+                chart_svg = None
         results.append(
             {
                 "symbol": sym,
@@ -89,6 +145,7 @@ def analyze_and_rank_with_loader(symbols: List[str], loader: Callable[[str], Opt
                     "last_signal": feats.get("last_signal"),
                     "decision": decision,
                     "decision_reasons": reasons,
+                    "chart_svg": chart_svg,
                 },
             }
         )

@@ -138,7 +138,7 @@ def analyze_it(
     loader = get_loader(source, data_dir=data_dir, api_key=apikey.strip())
     loader = make_cached_loader(loader, source=source, cache_dir=".cache", ttl_hours=ttl_hours, throttle_ms=throttle_ms)
 
-    ranked = analyze_and_rank_with_loader(symbols_list, loader, fast=fast, slow=slow)
+    ranked = analyze_and_rank_with_loader(symbols_list, loader, fast=fast, slow=slow, include_chart=True)
     if decision_only is not None:
         ranked = [r for r in ranked if (r.get("meta", {}).get("decision") == "BUY")]
 
@@ -211,7 +211,7 @@ def analyze(
     loader = get_loader(source, data_dir=data_dir, api_key=apikey.strip())
     loader = make_cached_loader(loader, source=source, cache_dir=".cache", ttl_hours=ttl_hours, throttle_ms=throttle_ms)
 
-    ranked = analyze_and_rank_with_loader(symbols_list, loader, fast=fast, slow=slow)
+    ranked = analyze_and_rank_with_loader(symbols_list, loader, fast=fast, slow=slow, include_chart=True)
     if decision_only is not None:
         ranked = [r for r in ranked if (r.get("meta", {}).get("decision") == "BUY")]
 
