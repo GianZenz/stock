@@ -139,6 +139,7 @@ def analyze_and_rank_with_loader(symbols: List[str], loader: Callable[[str], Opt
                 "symbol": sym,
                 "score": score,
                 "meta": {
+                    "currency": ts.get("_currency"),
                     "last_close": feats.get("last_close"),
                     "dist_200sma_pct": feats.get("dist_200sma_pct"),
                     "sma50_slope": feats.get("sma50_slope"),

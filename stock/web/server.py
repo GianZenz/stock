@@ -118,6 +118,7 @@ def analyze_it(
     symbols: str = Form(""),
     ttl_hours: int = Form(24),
     throttle_ms: int = Form(400),
+    conv: str = Form("")
 ):
     # Prepare symbols according to user inputs
     symbols_list: List[str] = []
@@ -141,6 +142,37 @@ def analyze_it(
     ranked = analyze_and_rank_with_loader(symbols_list, loader, fast=fast, slow=slow, include_chart=True)
     if decision_only is not None:
         ranked = [r for r in ranked if (r.get("meta", {}).get("decision") == "BUY")]
+
+    # Currency conversion (optional)
+    conv = (conv or "").upper()
+    if conv in ("USD", "EUR"):
+        try:
+            from ..data.yahoo import load_fx_rate_yahoo
+            for item in ranked:
+                meta = item.get("meta", {})
+                price = meta.get("last_close")
+                cur = (meta.get("currency") or "").upper()
+                if isinstance(price, (int, float)) and cur and cur != conv:
+                    rate = load_fx_rate_yahoo(cur, conv)
+                    if isinstance(rate, float):
+                        meta["display_price"] = float(price) * rate
+                        meta["currency_display"] = conv
+                    else:
+                        meta["display_price"] = price
+                        meta["currency_display"] = cur or "N/A"
+                else:
+                    meta["display_price"] = price
+                    meta["currency_display"] = cur or "N/A"
+        except Exception:
+            for item in ranked:
+                meta = item.get("meta", {})
+                meta["display_price"] = meta.get("last_close")
+                meta["currency_display"] = meta.get("currency") or "N/A"
+    else:
+        for item in ranked:
+            meta = item.get("meta", {})
+            meta["display_price"] = meta.get("last_close")
+            meta["currency_display"] = meta.get("currency") or "N/A"
 
     hint = None
     if not ranked and symbols_list:
@@ -168,6 +200,7 @@ def analyze_it(
                 "apikey": apikey,
                 "ttl_hours": ttl_hours,
                 "throttle_ms": throttle_ms,
+                "conv": conv,
             },
             "ranked": ranked[: max(1, top)],
             "hint": hint,
@@ -191,6 +224,7 @@ def analyze(
     symbols: str = Form(""),
     ttl_hours: int = Form(24),
     throttle_ms: int = Form(400),
+    conv: str = Form("")
 ):
     # Prepare symbols according to user inputs
     symbols_list: List[str] = []
@@ -214,6 +248,36 @@ def analyze(
     ranked = analyze_and_rank_with_loader(symbols_list, loader, fast=fast, slow=slow, include_chart=True)
     if decision_only is not None:
         ranked = [r for r in ranked if (r.get("meta", {}).get("decision") == "BUY")]
+
+    conv = (conv or "").upper()
+    if conv in ("USD", "EUR"):
+        try:
+            from ..data.yahoo import load_fx_rate_yahoo
+            for item in ranked:
+                meta = item.get("meta", {})
+                price = meta.get("last_close")
+                cur = (meta.get("currency") or "").upper()
+                if isinstance(price, (int, float)) and cur and cur != conv:
+                    rate = load_fx_rate_yahoo(cur, conv)
+                    if isinstance(rate, float):
+                        meta["display_price"] = float(price) * rate
+                        meta["currency_display"] = conv
+                    else:
+                        meta["display_price"] = price
+                        meta["currency_display"] = cur or "N/A"
+                else:
+                    meta["display_price"] = price
+                    meta["currency_display"] = cur or "N/A"
+        except Exception:
+            for item in ranked:
+                meta = item.get("meta", {})
+                meta["display_price"] = meta.get("last_close")
+                meta["currency_display"] = meta.get("currency") or "N/A"
+    else:
+        for item in ranked:
+            meta = item.get("meta", {})
+            meta["display_price"] = meta.get("last_close")
+            meta["currency_display"] = meta.get("currency") or "N/A"
 
     hint = None
     if not ranked and symbols_list:
@@ -241,6 +305,7 @@ def analyze(
                 "apikey": apikey,
                 "ttl_hours": ttl_hours,
                 "throttle_ms": throttle_ms,
+                "conv": conv,
             },
             "ranked": ranked[: max(1, top)],
             "hint": hint,

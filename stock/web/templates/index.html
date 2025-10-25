@@ -89,6 +89,14 @@
               <label>CSV Data Dir</label>
               <input type="text" name="data_dir" id="data_dir" value="{{defaults.data_dir}}" />
             </div>
+            <div>
+              <label>Convert To</label>
+              <select name="conv" id="conv">
+                <option value="" {{ 'selected' if (not defaults.get('conv')) else '' }}>Native</option>
+                <option value="USD" {{ 'selected' if defaults.get('conv')=='USD' else '' }}>USD</option>
+                <option value="EUR" {{ 'selected' if defaults.get('conv')=='EUR' else '' }}>EUR</option>
+              </select>
+            </div>
           </div>
           <div class="row" style="margin-top:8px; align-items:center;">
             <label class="muted" style="display:flex; align-items:center; gap:6px;">
@@ -182,10 +190,11 @@
               <th data-col="2" data-type="num">Score <span class="arrow"></span></th>
               <th data-col="3" data-type="str">Decision <span class="arrow"></span></th>
               <th data-col="4" data-type="num">Price <span class="arrow"></span></th>
-              <th data-col="5" data-type="num">Dist 200SMA % <span class="arrow"></span></th>
-              <th data-col="6" data-type="num">50SMA Slope <span class="arrow"></span></th>
-              <th data-col="7" data-type="str">Last Signal <span class="arrow"></span></th>
-            </tr>
+              <th data-col="5" data-type="str">Currency <span class="arrow"></span></th>
+              <th data-col="6" data-type="num">Dist 200SMA % <span class="arrow"></span></th>
+              <th data-col="7" data-type="num">50SMA Slope <span class="arrow"></span></th>
+              <th data-col="8" data-type="str">Last Signal <span class="arrow"></span></th>
+          </tr>
           </thead>
           <tbody>
             {% for r in ranked %}
@@ -202,7 +211,8 @@
                 <td>{{ '%.3f'|format(r.score) }}</td>
                 {% set d = m.get('decision') or "DON'T BUY" %}
                 <td class="{{ 'buy' if d=='BUY' else 'nobuy' }}">{{ d }}</td>
-                <td>{{ '%.2f'|format(m.get('last_close') or 0) if m.get('last_close') is number else 'nan' }}</td>
+                <td>{{ '%.2f'|format(m.get('display_price') if m.get('display_price') is number else (m.get('last_close') or 0)) }}</td>
+                <td>{{ m.get('currency_display') or m.get('currency') or 'N/A' }}</td>
                 <td>{{ '%.2f'|format(m.get('dist_200sma_pct') or 0) if m.get('dist_200sma_pct') is number else 'nan' }}</td>
                 <td>{{ '%.4f'|format(m.get('sma50_slope') or 0) if m.get('sma50_slope') is number else 'nan' }}</td>
                 <td>{{ m.get('last_signal') or 'none' }}</td>

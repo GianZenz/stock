@@ -35,6 +35,7 @@ def load_symbol_yahoo(symbol: str, range_: str = "1y", interval: str = "1d") -> 
     indicators = res.get("indicators", {})
     quote = (indicators.get("quote") or [{}])[0]
     adj = (indicators.get("adjclose") or [{}])[0]
+    meta = res.get("meta") or {}
 
     opens = quote.get("open") or []
     highs = quote.get("high") or []
@@ -91,6 +92,7 @@ def load_symbol_yahoo(symbol: str, range_: str = "1y", interval: str = "1d") -> 
         "low": l_list,
         "close": c_list,
         "volume": v_list,
+        "_currency": meta.get("currency"),
     }
 
 
@@ -114,3 +116,35 @@ def probe_yahoo(symbol: str, range_: str = "1y", interval: str = "1d") -> Dict[s
         return {"status": "error", "message": "Empty result array", "host": host_tried}
     ts = res[0].get("timestamp") or []
     return {"status": "ok", "message": f"Received {len(ts)} bars", "host": host_tried}
+
+
+def load_fx_rate_yahoo(ccy_from: str, ccy_to: str) -> Optional[float]:
+    """Return conversion rate (to units per from unit), using Yahoo chart.
+
+    Example: EUR->USD returns USD per EUR using EURUSD=X. If only USDEUR=X exists, returns 1/rate.
+    """
+    if not ccy_from or not ccy_to or ccy_from.upper() == ccy_to.upper():
+        return 1.0
+    a = f"{ccy_from.upper()}{ccy_to.upper()}=X"
+    data = _fetch_chart(a, interval="1d", range_="1mo")
+    def last_close(d: Optional[dict]) -> Optional[float]:
+        try:
+            res = d.get("chart", {}).get("result")
+            if not res:
+                return None
+            closes = (res[0].get("indicators", {}).get("quote") or [{}])[0].get("close") or []
+            for v in reversed(closes):
+                if v is not None:
+                    return float(v)
+        except Exception:
+            return None
+        return None
+    r = last_close(data)
+    if isinstance(r, float):
+        return r
+    b = f"{ccy_to.upper()}{ccy_from.upper()}=X"
+    data2 = _fetch_chart(b, interval="1d", range_="1mo")
+    r2 = last_close(data2)
+    if isinstance(r2, float) and r2 != 0:
+        return 1.0 / r2
+    return None
